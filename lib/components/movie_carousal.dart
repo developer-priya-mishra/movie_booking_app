@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
+import '../models/movie_model.dart';
 import 'movie_card.dart';
 import 'movie_label.dart';
 
@@ -20,7 +21,7 @@ class MovieCarousal extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasData) {
-            List dataList = snapshot.data;
+            List<MovieModel> movieList = snapshot.data;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,15 +37,17 @@ class MovieCarousal extends StatelessWidget {
                     enlargeCenterPage: true,
                     enlargeFactor: 0.2,
                   ),
-                  itemCount: dataList.length,
+                  itemCount: movieList.length,
                   itemBuilder: (
                     BuildContext context,
                     int itemIndex,
                     int pageViewIndex,
                   ) {
+                    MovieModel movie = movieList[itemIndex];
+
                     return MovieCard(
-                      id: dataList[itemIndex]["id"],
-                      imagePath: dataList[itemIndex]["backdrop_path"],
+                      id: movie.id,
+                      imagePath: movie.backdropPath,
                       aspectRatio: 16 / 9,
                     );
                   },

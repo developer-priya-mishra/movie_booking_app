@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movie_booking_app/models/movie_model.dart';
 import 'package:movie_booking_app/services/api_services.dart';
 
 import '../components/movie_card.dart';
@@ -39,13 +40,13 @@ class Search extends SearchDelegate {
     }
 
     return FutureBuilder(
-      future: FirestoreServices.addRecentSearch(query).then(
+      future: FirestoreServices.setRecentSearch(query).then(
         (value) => ApiServices.searchMovies(query),
       ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasData) {
-            List datalist = snapshot.data!;
+            List<MovieModel> movieList = snapshot.data!;
 
             return GridView.builder(
               padding: const EdgeInsets.symmetric(
@@ -57,13 +58,13 @@ class Search extends SearchDelegate {
                 childAspectRatio: 2 / 3,
                 mainAxisSpacing: 10,
               ),
-              itemCount: datalist.length,
+              itemCount: movieList.length,
               itemBuilder: (context, index) {
-                Map<String, dynamic> item = datalist[index];
+                MovieModel movie = movieList[index];
 
                 return MovieCard(
-                  id: item["id"],
-                  imagePath: item["poster_path"],
+                  id: movie.id,
+                  imagePath: movie.posterPath,
                 );
               },
             );
@@ -90,6 +91,7 @@ class Search extends SearchDelegate {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasData && snapshot.data!.isNotEmpty) {
               List datalist = snapshot.data!;
+
               return ListView.builder(
                 itemCount: datalist.length,
                 itemBuilder: (context, index) {
@@ -128,28 +130,28 @@ class Search extends SearchDelegate {
       future: ApiServices.searchMovies(query),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          List datalist = snapshot.data!;
+          List<MovieModel> movieList = snapshot.data!;
 
           return ListView.builder(
-            itemCount: datalist.length > 5 ? 5 : datalist.length,
+            itemCount: movieList.length > 5 ? 5 : movieList.length,
             itemBuilder: (context, index) {
-              Map<String, dynamic> item = datalist[index];
+              MovieModel movie = movieList[index];
 
               return ListTile(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => MovieDetail(item["id"]),
+                      builder: (context) => MovieDetail(movie.id),
                     ),
                   );
                 },
                 leading: const Icon(Icons.search),
-                title: Text(item["title"]),
+                title: Text(movie.title),
                 contentPadding: const EdgeInsets.only(left: 16.0),
                 trailing: IconButton(
                   onPressed: () {
-                    query = item["title"];
+                    query = movie.title;
                   },
                   icon: const Icon(Icons.north_west),
                 ),

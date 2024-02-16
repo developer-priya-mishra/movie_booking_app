@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/movie_model.dart';
 import '../services/api_services.dart';
 import '../services/firestore_services.dart';
 import 'booking.dart';
@@ -13,30 +14,12 @@ class MovieDetail extends StatefulWidget {
 }
 
 class _MovieDetailState extends State<MovieDetail> {
-  String movieTitle = "";
-  String? backdropPath = "";
-  String? posterPath = "";
-
-  Future<void> setRecentViewed() async {
-    List recentViewed = [
-      widget.id,
-    ];
-
-    Map<String, dynamic>? fields = await FirestoreServices.getCurrentUserData();
-
-    if (fields != null && fields["recent viewed"] != null) {
-      recentViewed.addAll(fields["recent viewed"]);
-    }
-
-    await FirestoreServices.setCurrentUserData(
-      {"recent viewed": recentViewed.toSet()},
-    );
-  }
+  late MovieModel movie;
 
   @override
   void initState() {
     super.initState();
-    setRecentViewed();
+    FirestoreServices.setRecentViewed(widget.id);
   }
 
   @override
@@ -51,11 +34,7 @@ class _MovieDetailState extends State<MovieDetail> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasData) {
-              List genresList = snapshot.data?["genres"];
-
-              movieTitle = snapshot.data?["title"];
-              backdropPath = snapshot.data?["backdrop_path"];
-              posterPath = snapshot.data?["poster_path"];
+              movie = snapshot.data!;
 
               return ListView(
                 children: [
@@ -63,7 +42,7 @@ class _MovieDetailState extends State<MovieDetail> {
                     aspectRatio: 16.0 / 9.0,
                     child: Stack(
                       children: [
-                        backdropPath == null
+                        movie.backdropPath.isEmpty
                             ? Container(
                                 color: Colors.grey.shade100,
                                 child: Center(
@@ -76,10 +55,10 @@ class _MovieDetailState extends State<MovieDetail> {
                             : Opacity(
                                 opacity: 0.4,
                                 child: Image.network(
-                                  "${ApiServices.imageUrl}w780$backdropPath",
+                                  "${ApiServices.imageUrl}w780${movie.backdropPath}",
                                 ),
                               ),
-                        posterPath == null
+                        movie.posterPath.isEmpty
                             ? Positioned(
                                 bottom: 15.0,
                                 left: 15.0,
@@ -104,7 +83,7 @@ class _MovieDetailState extends State<MovieDetail> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10.0),
                                   child: Image.network(
-                                    "${ApiServices.imageUrl}w92$posterPath",
+                                    "${ApiServices.imageUrl}w92${movie.posterPath}",
                                   ),
                                 ),
                               ),
@@ -117,17 +96,15 @@ class _MovieDetailState extends State<MovieDetail> {
                               TextSpan(
                                 children: [
                                   TextSpan(
-                                    text: movieTitle,
+                                    text: movie.title,
                                     style: const TextStyle(
                                       fontSize: 25.0,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  if (snapshot.data!["tagline"]
-                                      .toString()
-                                      .isNotEmpty)
+                                  if (movie.tagline.isNotEmpty)
                                     TextSpan(
-                                      text: "\n(${snapshot.data?["tagline"]})",
+                                      text: "\n(${movie.tagline})",
                                     ),
                                 ],
                               ),
@@ -143,12 +120,12 @@ class _MovieDetailState extends State<MovieDetail> {
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: genresList.map((item) {
+                      children: movie.genres.map((item) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 3.0),
                           child: RawChip(
                             label: Text(
-                              item["name"],
+                              item,
                             ),
                           ),
                         );
@@ -172,9 +149,7 @@ class _MovieDetailState extends State<MovieDetail> {
                               fontSize: 20.0,
                             ),
                           ),
-                          Text(
-                            snapshot.data?["overview"],
-                          ),
+                          Text(movie.overview),
                         ],
                       ),
                     ),
@@ -205,14 +180,7 @@ class _MovieDetailState extends State<MovieDetail> {
                                   fontSize: 15.5,
                                 ),
                               ),
-                              Text(
-                                snapshot.data!["release_date"]
-                                    .toString()
-                                    .split("-")
-                                    .reversed
-                                    .toList()
-                                    .join("-"),
-                              ),
+                              Text(movie.releaseDate),
                             ],
                           ),
                           Row(
@@ -224,9 +192,7 @@ class _MovieDetailState extends State<MovieDetail> {
                                   fontSize: 15.5,
                                 ),
                               ),
-                              Text(
-                                "${snapshot.data?["runtime"] ~/ 60} hrs ${snapshot.data?["runtime"] % 60} min",
-                              ),
+                              Text(movie.runtime),
                             ],
                           ),
                           Row(
@@ -238,7 +204,7 @@ class _MovieDetailState extends State<MovieDetail> {
                                   fontSize: 15.5,
                                 ),
                               ),
-                              Text(snapshot.data?["status"]),
+                              Text(movie.status),
                             ],
                           ),
                           Row(
@@ -250,7 +216,7 @@ class _MovieDetailState extends State<MovieDetail> {
                                   fontSize: 15.5,
                                 ),
                               ),
-                              Text(snapshot.data?["original_language"]),
+                              Text(movie.originalLanguage),
                             ],
                           ),
                           Row(
@@ -261,7 +227,7 @@ class _MovieDetailState extends State<MovieDetail> {
                                 size: 18.0,
                               ),
                               const SizedBox(width: 5.0),
-                              Text(snapshot.data!["vote_average"].toString()),
+                              Text(movie.voteAverage),
                               const SizedBox(
                                 height: 15.0,
                                 child: VerticalDivider(),
@@ -272,7 +238,7 @@ class _MovieDetailState extends State<MovieDetail> {
                                 size: 18.0,
                               ),
                               const SizedBox(width: 5.0),
-                              Text(snapshot.data!["vote_count"].toString()),
+                              Text(movie.voteCount),
                               const SizedBox(
                                 height: 15.0,
                                 child: VerticalDivider(),
@@ -283,7 +249,7 @@ class _MovieDetailState extends State<MovieDetail> {
                                 size: 18.0,
                               ),
                               const SizedBox(width: 5.0),
-                              Text(snapshot.data!["popularity"].toString()),
+                              Text(movie.popularity),
                             ],
                           )
                         ],
@@ -312,7 +278,7 @@ class _MovieDetailState extends State<MovieDetail> {
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => Booking(title: movieTitle),
+              builder: (context) => Booking(title: movie.title),
             ),
           ),
           style: ButtonStyle(

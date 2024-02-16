@@ -45,7 +45,7 @@ class FirestoreServices {
     }
   }
 
-  static Future<void> addRecentSearch(String query) async {
+  static Future<void> setRecentSearch(String query) async {
     List recentQueries = [];
     recentQueries.add(query);
 
@@ -57,6 +57,21 @@ class FirestoreServices {
 
     await FirestoreServices.setCurrentUserData(
       {"recent search": recentQueries.toSet()},
+    );
+  }
+
+  static Future<void> setRecentViewed(int id) async {
+    List recentViewed = [];
+    recentViewed.add(id);
+
+    Map<String, dynamic>? fields = await FirestoreServices.getCurrentUserData();
+
+    if (fields != null && fields["recent viewed"] != null) {
+      recentViewed.addAll(fields["recent viewed"]);
+    }
+
+    await FirestoreServices.setCurrentUserData(
+      {"recent viewed": recentViewed.toSet()},
     );
   }
 }

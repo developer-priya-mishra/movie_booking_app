@@ -5,7 +5,7 @@ import '../services/api_services.dart';
 
 class MovieCard extends StatelessWidget {
   final int id;
-  final String? imagePath;
+  final String imagePath;
   final double aspectRatio;
   const MovieCard({
     super.key,
@@ -35,7 +35,7 @@ class MovieCard extends StatelessWidget {
         ),
         child: AspectRatio(
           aspectRatio: aspectRatio,
-          child: imagePath == null
+          child: imagePath.isEmpty
               ? const Center(
                   child: Icon(
                     Icons.broken_image,

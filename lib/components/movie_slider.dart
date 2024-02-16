@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movie_booking_app/models/movie_model.dart';
 
 import 'movie_card.dart';
 import 'movie_label.dart';
@@ -19,7 +20,7 @@ class MovieSlider extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasData) {
-            List datalist = snapshot.data;
+            List<MovieModel> movieList = snapshot.data;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,11 +32,13 @@ class MovieSlider extends StatelessWidget {
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 7.5),
                     scrollDirection: Axis.horizontal,
-                    itemCount: datalist.length,
+                    itemCount: movieList.length,
                     itemBuilder: (context, index) {
+                      MovieModel movie = movieList[index];
+
                       return MovieCard(
-                        id: datalist[index]["id"],
-                        imagePath: datalist[index]["poster_path"],
+                        id: movie.id,
+                        imagePath: movie.posterPath,
                         aspectRatio: 2 / 3,
                       );
                     },
