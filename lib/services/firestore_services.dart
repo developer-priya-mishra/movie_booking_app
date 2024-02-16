@@ -34,4 +34,29 @@ class FirestoreServices {
       rethrow;
     }
   }
+
+  static Future<List<dynamic>> getRecentSearch() async {
+    Map<String, dynamic>? fields = await getCurrentUserData();
+
+    if (fields != null && fields["recent search"] != null) {
+      return fields["recent search"];
+    } else {
+      return [];
+    }
+  }
+
+  static Future<void> addRecentSearch(String query) async {
+    List recentQueries = [];
+    recentQueries.add(query);
+
+    Map<String, dynamic>? fields = await FirestoreServices.getCurrentUserData();
+
+    if (fields != null && fields["recent search"] != null) {
+      recentQueries.addAll(fields["recent search"]);
+    }
+
+    await FirestoreServices.setCurrentUserData(
+      {"recent search": recentQueries.toSet()},
+    );
+  }
 }

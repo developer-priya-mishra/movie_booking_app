@@ -11,7 +11,7 @@ class MovieCard extends StatelessWidget {
     super.key,
     required this.id,
     required this.imagePath,
-    required this.aspectRatio,
+    this.aspectRatio = 2 / 3,
   });
 
   @override
